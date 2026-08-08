@@ -137,7 +137,7 @@ if [ ! -d "$OPENCLAW_HOME/agents/main" ]; then
 
     echo "[INFO] 設定 agent 預設 model..."
     LAB_MODEL="${MODEL:-meta/llama-3.1-70b-instruct}"
-    su - clawuser -c "openclaw config set agents.defaults.model '${LAB_MODEL}' 2>&1 | tail -3"
+    su - clawuser -c "openclaw config set agents.defaults.model 'nvidia/${LAB_MODEL}' 2>&1 | tail -3"
 fi
 
 # ── 啟動 OpenClaw Gateway ────────────────────────────────────────
