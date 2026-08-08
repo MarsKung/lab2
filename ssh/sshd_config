@@ -1,0 +1,14 @@
+Port 22
+PasswordAuthentication no
+PubkeyAuthentication yes
+PermitRootLogin no
+UsePAM no
+PrintMotd no
+Subsystem sftp internal-sftp
+
+AllowUsers clawuser
+Match User clawuser
+    ChrootDirectory /srv/openclaw
+    ForceCommand internal-sftp
+    AllowTcpForwarding no
+    X11Forwarding no

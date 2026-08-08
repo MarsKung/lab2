@@ -1,0 +1,15 @@
+
+  Lab 2: OpenClaw Skill Poisoning + Copy Fail (CVE-2026-31431)
+
+  Target       sftp clawuser@10.0.1.50   (SFTP-only, no shell)
+  Player key   /work/player_key
+  Skills dir   skills/weather-reporter/   (in SFTP chroot)
+  Goal         poison a skill -> LLM triggers -> reverse shell -> privesc -> /flag
+
+  Steps:
+    1. sftp -i /work/player_key clawuser@10.0.1.50
+    2. Upload your malicious skill (put SKILL.md / fetch.py)
+    3. Wait for LLM cron (every 60s) to trigger
+    4. Catch the reverse shell:  nc -lvp 9001
+    5. Copy Fail privesc to root, then:  cat /flag
+

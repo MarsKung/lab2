@@ -1,0 +1,63 @@
+name: lab2-copyfail
+
+# Lab 2: OpenClaw skill poisoning + CVE-2026-31431 Copy Fail
+#
+# Standalone Lab 2 environment. Players SFTP in as clawuser, upload a
+# malicious skill, wait for the LLM cron to trigger it, get a reverse
+# shell, then use Copy Fail to escalate to root and read /flag.
+#
+#   10.0.1.50:22   copyfail-target  (clawuser, SFTP-only)
+#
+# The player's SSH private key is printed in `docker compose logs copyfail-target`.
+#
+# Usage:
+#   cp .env.example .env        # fill in NVIDIA_API_KEY
+#   docker compose up -d
+#   docker compose logs copyfail-target   # grab the player key
+
+networks:
+  labnet:
+    name: ${LAB_NETWORK:-labnet}
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.1.0/24
+          gateway: 10.0.1.1
+
+services:
+  copyfail-target:
+    build:
+      context: .
+      args:
+        FLAG2: ${FLAG2:-FLAG{c0pyfail_v1a_llm_sk1ll_supply_ch41n}}
+    image: lab2/copyfail-target:1.0
+    container_name: lab2-copyfail-target
+    hostname: sftp-staging
+    restart: unless-stopped
+    environment:
+      - NVIDIA_API_KEY=${NVIDIA_API_KEY:-}
+      - MODEL=${MODEL:-meta/llama-3.1-70b-instruct}
+      - FLAG1=${FLAG1:-FLAG{c1cd_pull_request_pwn_2f9c41ab}}
+    volumes:
+      - ./keys:/srv/keys
+    networks:
+      labnet:
+        ipv4_address: 10.0.1.50
+    ports:
+      - "${LAB2_SSH_PORT:-2250}:22"
+    security_opt:
+      - seccomp=unconfined
+
+  attacker:
+    build: ./attacker
+    image: lab2/attacker:1.0
+    container_name: lab2-attacker
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    command: ["sleep", "infinity"]
+    volumes:
+      - ./keys:/work/keys:ro
+    networks:
+      labnet:
+        ipv4_address: 10.0.1.98
